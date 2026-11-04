@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+build/
+dist/
+.coverage
+htmlcov/
+
+# IDE and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Simulation temporary/results (curate reference fixtures explicitly)
+*.ans
+*.fem.bak
+*.log
+runs/
+artifacts/
+scratch/
+
+# Secrets and local installations
+.env
+.env.*
+!.env.example
+local_config.*
