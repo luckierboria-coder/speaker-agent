@@ -1,41 +1,39 @@
-# M0/M1 Engineering Specification
+# M0/M1 Acoustic-First Engineering Specification
 
-## Reference scope
-Conventional axisymmetric moving-coil magnetic motor; 2D r-z cross section. This is a reference implementation, not the only planned driver architecture.
+Status: draft, not a validated prediction. Supersedes the earlier magnetic-motor-first M1 specification.
 
-## Canonical coordinates
-r: radial position in meters, r >= 0.
-z: axial position in meters.
-x: axial voice-coil displacement relative to the documented nominal rest position, meters. Define +x explicitly in each reference fixture.
-All stored quantities use SI units; UI may show millimeters, tesla, newtons per ampere, ohms.
+## Stage scope
+Create standard acoustic targets, low-frequency small-signal electromechanical/pressure-radiation models and constrained inverse searches. Do not solve magnetic geometry before acoustic feasibility.
 
-## Inputs
-Topology ID and template version; part geometry (magnet, yoke, pole, top plate, gap, coil); coil turns, active conductor directions and winding distribution; material identifiers and B-H curve revision; relevant air domain; boundary conditions; excitation; mesh controls; x sweep; geometric tolerance and cost assumptions.
+## Acoustic target must state
+- Target points or curve: frequency in Hz, sound pressure level in dB re 20 µPa (RMS air) with tolerances or constrained bands. Define smoothing, gating, and frequency range where relevant.
+- Conditions: acoustic environment, distance to observation point, observation angle, baffle or IEC test fixture, open/closed back and any acoustic loading.
+- Electrical drive: explicitly distinguish 2.83 V RMS, 1 W, other specified V/I/P. Avoid treating 2.83 V as universally 1 W.
+- Boundaries and options: driver OD, effective radiating area if known, package volume limits, excursion, nominal impedance/Re, operating temperature, tolerances and cost target.
+- Provenance: engineering proposal, measured sample, manufacturer datasheet, independently published reference or placeholder. Missing values must remain missing.
 
-## Outputs
-Magnetic field B(r,z), gap flux density sampling definition, magnetic energy when supported, BL(x) in newtons per ampere, useful-stroke flatness metric, mass/volume estimates, solver logs, warnings, and validation records.
+## Forward model phase (M1.1)
+- Start with linear small-signal electro-mechanical equivalent-circuit response: Re, Le (or Z_e(f)), Mms, Cms, Rms, BL, active radiating area and an appropriate acoustic radiation load.
+- Explicitly declare assumptions regarding piston motion, acoustic loading, rear radiation, baffle and source feedback.
+- Output impedance, diaphragm velocity/displacement, radiated response/SPL at a documented observation point when physically valid.
+- No implied full-band response outside model validity or nonlinear THD.
 
-## Physics and numerical definitions
-BL(x) must have a documented derivation from current-driven Lorentz force or the solver's verified force/flux-linkage method, with force sign conventions and current normalization explicit. Handle coil movement consistently; no interpolation or assumed constant gap field may be presented as a high-fidelity BL(x) result.
+## Inverse model phase (M1.2)
+- Fit acoustic response with a bounded and constrained feasible parameter region; use optimization and sensitivity metrics, not agent guesses.
+- Constraints must account for parameter interdependence, realizable cone/support geometry, voltage/current/temperature, motor force vs moving mass/compliance, and maximum stroke.
+- A single FR curve cannot uniquely identify BL, Re, Mms and Cms. Return multiple feasible design sets and their risk/reality flags.
 
-An optional normalized flatness objective over stroke [-X, +X]:
-E = (1/(2X)) * integral(((BL(x) - BL(0))/BL(0))^2 dx).
-Reject when BL(0) is zero or invalid. This is one selectable design metric, not a universal industry standard.
+## Fitting physical design
+- Acoustics -> dynamic parameters -> mechanical structure -> motor parameters (BL, Le, Re) -> detailed magnetic FEA -> updated acoustic response.
+- A proposed motor geometry must be returned to the acoustic model, not deemed complete based on BL alone.
 
-## Early constraints
-- Positive thickness/height; physically possible stack-up and radial clearance.
-- Material assignments and B-H data present and versioned.
-- Magnetic saturation evaluated against reference material behavior.
-- Coil excursion and clearance checked across requested sweep.
-- Compare winding, current and displacement conventions across all runs.
+## Validation levels
+V0 unit/schema/condition checks (CI).
+V1 independent analytically solvable cases, including impedance/rigid piston within assumptions.
+V2 external solver comparison with a curated model (COMSOL Lumped Loudspeaker Driver is a candidate).
+V3 physical driver measurement including SPL and impedance under matched conditions.
+Publish achieved/blocked/unverified status for each independently.
 
-## Verification strategy
-1. Unit tests: schema, dimension conversion, invalid overlaps, material completeness.
-2. Physics fixtures: independently inspected motor geometry and field/BL curves.
-3. Mesh refinement: tolerance on specified observables, not just mesh element count.
-4. Repeatability: same solver/settings/input reproduce outputs within fixed numerical tolerance.
-5. Comparison: FEMM output vs reference FEM or trusted measurements; document disagreement conditions.
-6. Regression: saved fixture revisions and approved result tolerances.
-
-## Explicit limitations
-FEMM axisymmetric magnetostatics does not itself provide full 3D acoustic response, diaphragm breakup, nonlinear THD, or thermal compression. Never infer these from a magnetic field plot alone.
+## References
+- https://www.comsol.com/model/lumped-loudspeaker-driver-12295
+- https://doc.comsol.com/6.3/doc/com.comsol.help.models.aco.lumped_loudspeaker_driver/lumped_loudspeaker_driver.html
