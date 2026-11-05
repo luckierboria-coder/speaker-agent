@@ -1,29 +1,38 @@
-# Development guide
+# Development Guide — M0 Acoustic First
 
-## Requirements
-Python 3.12+, Git. FEMM is an external Windows application and is NOT required for the M0 tests.
+Requires Python 3.12+, Git. No FEMM or COMSOL installation is required for M0 metadata tests.
 
 ## Setup
-1. Clone the repository.
-2. Create and activate a Python virtual environment.
-3. Install the package with: python -m pip install -e ".[dev]"
-4. Execute: python -m pytest -q
-5. Optionally run: python -m ruff check .
+```powershell
+git clone https://github.com/luckierboria-coder/speaker-agent.git
+cd speaker-agent
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -e ".[dev]"
+python -m pytest -q
+python -m ruff check .
+```
 
-## Repository structure
-- docs/: project decisions, architecture, roadmap, specifications, tool contract.
-- src/speaker_agent/core/: shared validated data contracts.
-- src/speaker_agent/solvers/: external solver adapter namespaces.
-- src/speaker_agent/agent_interface/: provider-neutral external agent integration.
-- tests/: deterministic contract and later physics validation tests.
-- examples/: future reproducible reference fixtures.
+## Current modules
+- src/speaker_agent/core/contracts.py: generic finite-valued engineering input with units.
+- src/speaker_agent/core/acoustic_targets.py: acoustic targets, voltage/power excitation, SPL reference and test-condition validation.
+- docs/engineering: measurement requirements, CAD, materials, solver contract and benchmark plan.
+- benchmarks/acoustic: reference registry. No validated frequency response or SPL exists yet.
+- benchmarks/production-driver: pending manufacturer-provided sample and measurements.
+- src/speaker_agent/solvers/femm: reserved later motor-fitting adapter namespace; no functionality.
 
-## Integration rules
-- Keep the physics execution separate from the language-model client.
-- Preserve units and solver input provenance in every result.
-- No unreviewed changes to real engineering models or licenses.
-- Prefer integrations with existing engineer tools over replacing those tools.
-- Mark an unverified physical result as unverified.
+## Engineering workflow
+1. Acoustic target and experimental fixture conditions.
+2. Forward small-signal electroacoustic model, compared with independent analytical/reference cases.
+3. Inverse parameter fitting yielding feasible regions; quantify ambiguity.
+4. Diaphragm/suspension physical fit.
+5. Motor BL/Le/Re fitting and return to acoustic re-simulation.
 
-## First development ticket
-Define machine-readable JSON-compatible schemas for topology, geometry, material provenance, run configuration, result status and engineering quantities. Freeze a first baseline fixture before implementing the FEMM adapter.
+## Next ticket
+Acquire and verify an independently reproducible acoustic reference, then implement a simple small-signal forward prediction with input/condition metadata and actual numerical regression tests.
+
+## Governance
+- No embedded AI model.
+- Existing engineering apps preferred.
+- Never declare physically verified based on schema/CI-only tests.
+- No company drawings/test records/material datasets committed to a public repository unless authorized.
