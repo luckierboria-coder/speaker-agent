@@ -1,42 +1,52 @@
-# Development Roadmap
+# SpeakerAgent Roadmap — Acoustic-Target-First
 
-Status: planning. No solver integration or validation is claimed yet.
+Status: revised architecture and proposed milestones; no physics validation has yet occurred.
 
-## M0.1 — Foundational contracts
-Deliverables: repository skeleton; units policy; topology and material schemas; tool catalogue; error/status taxonomy; reproducibility metadata; fixture and tests.
-Exit: reference project can be validated, serialized and reloaded without losing units or provenance.
+## M0.1 — Acoustic target engineering contract (NOW)
+- Define acoustic performance targets with reference conditions: frequency, dB SPL, tolerance bands, distance, axis angle, baffle, driving quantity (V_rms or power), acoustic medium, measurement window and provenance.
+- Define system constraints: outer diameter, mounting geometry, usable stroke, budget, power/thermal limits and manufacturable part families.
+- Establish units and schema, explicit missing-data states, machine-readable tests, benchmark provenance and model capability declarations.
+- Exit: target definitions round-trip reproducibly, and invalid/ambiguous conditions are rejected.
 
-## M0.2 — Deterministic tool runtime
-Deliverables: local CLI callable from external agents; clean tool boundaries; structured logs; dry-run mode; input and file validation.
-Exit: stable contract tests for errors and successful dry runs; no model dependency.
+## M0.2 — Acoustic reference and interfaces (NOW)
+- Create nonfabricated benchmark registry: trusted analytic rigid-piston and small-signal equivalent-circuit calculations, and cited third-party validated reference models (e.g., COMSOL Lumped Loudspeaker Driver).
+- Define solver adapters and standardized inputs/outputs for acoustics, mechanical, electromagnetic and measurements without tying the core to one vendor.
+- A dry-run adapter and CI tests test contracts only, not physical accuracy.
+- Exit: reference case and acceptance protocol agreed; external solver is not mandatory to test contracts.
 
-## M1.1 — Axisymmetric motor geometry
-Deliverables: initial conventional ferrite/neodymium motor template; voice coil and gap coordinate conventions; checks for overlaps and manufacturability.
-Exit: representative reference geometries produce consistent 2D cross sections.
+## M1.1 — Small-signal forward acoustic model
+- Implement or connect deterministic equivalent electro-mechanical circuit and acoustic radiation model for a specified boundary condition.
+- Predict impedance, cone velocity/displacement, on-axis SPL where source assumptions permit, and relevant acoustic-load quantities.
+- Validate first against analytical cases, then independently against a trusted model or measurement.
+- Exit: full test conditions, applicable frequency/linearity regime, numerical residual and known limitations reported.
 
-## M1.2 — FEMM adapter and BL(x)
-Deliverables: FEMM installation diagnostics; material B-H curves; axisymmetric magnetostatic model creation; meshing; sweep of coil position; force-factor calculation; field data and reports.
-Exit: repeatable run with documented mesh sensitivity and cross-check against an independently verified reference.
+## M1.2 — Target fitting / feasible-region search
+- Fit families of Mms, Cms, Rms, BL, Re and Le (subject to topology and material constraints) to a measured/declared acoustic target, with ambiguity and tradeoffs explicit.
+- Return ranked feasible sets/Pareto candidates, sensitivity and failure reasons; do not equate fitted abstract parameters with manufacturable designs.
+- Exit: candidates reproducibly improve a stated acoustic objective without violating hard constraints.
 
-## M1.3 — Parametric optimization
-Deliverables: constrained sweeps; multiple design objectives; candidate comparison and Pareto frontier; restartable run history.
-Exit: automatic optimization improves a defined objective without violating hard constraints.
+## M1.3 — Acoustic higher-fidelity integration
+- Prefer an engineer's existing COMSOL or other proven acoustic/structural solver. Support 2D axisymmetric or 3D FEM/BEM as geometry requires.
+- Model radiation baffle, near/far field, cavities and diaphragm deformation as justified by frequencies.
+- Exit: at least one independently reviewed coupled acoustic reference case with documented convergence and cross-checks.
 
-## M1.4 — External-agent skill / tool integration
-Deliverables: minimal MCP or CLI adapter, example prompts, safe tool actions, human confirmation boundaries, concise run summaries.
-Exit: at least two external clients can execute the same workflow without a bundled LLM.
+## M2 — Physical mechanics
+- Fit cone/diaphragm/suspension geometry and materials to the electromechanical target region.
+- Structural modal and dynamic verification; push updated model properties back into acoustic simulation.
 
-## M2 — Lumped electroacoustic models
-T/S parameter calculations; impedance/low-frequency predictions; measured-data imports; comparison/uncertainty.
+## M3 — Motor fitting (NOT the first-stage priority)
+- Fit magnet, gap, coil and steel geometry to demanded BL(x), Le(x,i), resistance, heat and stroke constraints, using FEMM/COMSOL or the engineer's tools.
+- Mechanical and motor parameter updates must close the acoustic-performance verification loop.
 
-## M3 — Structural design
-Cone, surround and spider geometry adapters; structural FEA; modal and stiffness validation.
+## M4+ — Nonlinearity, thermal, production and topology extensions
+- Harmonic/intermodulation distortion, temperature and compression, uncertainty, tolerance analysis, BOM, production testing, microspeakers/tweeters/other topologies.
 
-## M4 — 3D acoustic and multiphysics
-Commercial solver adapters; radiation, near/far field and directivity; coupling, mesh convergence and measurement correlation.
+## Do not conflate
+- An acoustic target is not an achieved response.
+- An equivalent-circuit fit is not a verified physical structure.
+- A solver API smoke test is not a magnetic/acoustic validation.
+- Frequency response at one condition is not sufficient to uniquely determine BL or motor geometry.
 
-## M5+ — Nonlinear, thermal and production integration
-BL(x), Kms(x), Le(x,i), thermal compression, tolerancing, BOM, cost and engineering approval workflows.
-
-## Work policy
-Do not add a new physics area before the preceding reference calculations are validated. Prefer one reliable automated engineering operation to many impressive but unverifiable features.
+## Official model references
+- https://www.comsol.com/model/lumped-loudspeaker-driver-12295
+- https://www.comsol.com/support/learning-center/course/modeling-speaker-drivers-in-comsol-multiphysics-202/modeling-speaker-drivers-lumped-methods-88401
