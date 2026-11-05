@@ -1,11 +1,13 @@
-# Reference examples
+# Reference Examples
 
-This folder will contain documented, verifiable test fixtures:
-- axisymmetric motor geometry and material assignments;
-- input parameter files and solver versions;
-- mesh convergence data;
-- independent reference calculations and measurement comparisons.
+First examples will cover an acoustic-target-first moving-coil loudspeaker:
+- measurement-condition and acoustic target input;
+- small-signal equivalent-circuit model;
+- appropriate acoustic radiation load, baffle and observation geometry;
+- independent analytical and official solver reference tests;
+- constrained electromechanical parameter candidate sets;
+- eventual mechanical and motor matching.
 
-There are no claimed FEMM, COMSOL or KLIPPEL results in the initial repository. Do not label synthetic examples as validated physical predictions.
+No computed, measured or published numerical responses have been imported or verified in this repository. Tests may use explicitly identified **synthetic** values only for code/data-contract validation.
 
-Proposed first fixture: a conventional moving-coil magnet system with axial coil sweep and audited BL(x) convention.
+The first physical calibration sample is pending: see benchmarks/production-driver/README.md and GitHub issue #1. FEMM motor checks will be added only after initial acoustic-model validation.
