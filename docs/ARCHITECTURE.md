@@ -1,38 +1,36 @@
-# Architecture
+# Architecture — Acoustic Target Drives the Pipeline
 
-## Primary design
-A headless, deterministic engineering tool core exposes a documented interface. External agents (Codex, Claude, others) can call those tools; an optional GUI makes them directly usable by engineers. The tool core has no embedded AI.
+## Core position
+SpeakerAgent is a model-neutral engineering tool layer. It never includes an AI model, and it does not reimplement COMSOL/ANSYS/FEMM as a general solver. External Codex/Claude/etc. agents and a local UI consume the same constrained deterministic tools.
 
-Logical layers:
-1. Engineer UI / external agent client.
-2. Tool API and policy checks (input validation, permissions, run budgets).
-3. Project model: topology, geometry, material provenance, parameters, units, boundary conditions, objectives, revision.
-4. Domain workflows: motor, diaphragm, suspension, acoustic radiation, thermal (independent stages).
-5. Solver adapters: FEMM first; COMSOL / ANSYS / MATLAB / existing vendor systems as permissions and interfaces allow.
-6. Postprocessing, uncertainty, verification, comparison and export.
-7. Artifact storage and run audit trail.
+## Data flow
+1. Acoustic goal and its measurement environment
+2. Feasibility and scope/assumption checks
+3. Low-cost small-signal electromechanical + radiation model
+4. Feasible-region / Pareto fitting of target system parameters
+5. Structural fitting and acoustic FEM/BEM cross-check
+6. Motor fitting to requested BL/Le with FEMM or other approved tools
+7. Recompute end-to-end acoustic response and compare to the original goal
+8. Test / calibration / report / approved revision
 
-## Technology decisions (initial)
-- Python 3.12+ for orchestration and engineering data processing.
-- Standard Python package; no GUI required to operate the core.
-- JSON-schema-compatible typed inputs and outputs; SI units internally.
-- NumPy / SciPy for numeric processing when introduced.
-- FEMM for baseline 2D axisymmetric magnetostatic calculations where the installed environment supports it.
-- UI, workflow server, database and optimizer chosen only when concrete requirements justify their complexity.
-- Support future MCP and/or CLI tool exposure without coupling the core to a specific AI provider.
+This is an iterative bidirectional coupling. Magnetics is a constraint-fitting submodule, not the primary optimizer.
 
-## Solver adapter contract
-Every adapter must identify the solver and version, check installation and license availability, declare supported physics and dimensions, prepare a deterministic input, run synchronously or return a job handle, capture logs and convergence status, export normalized results, and report structured failures. Never label a failed or unconverged run as successful.
+## Software topology
+- Python 3.12+ package for validation, automation, orchestrated job state, numerical analysis and connector contracts.
+- Internal engineering quantities use SI; external I/O declares units, axes and acoustic dB references.
+- Solver adapters are capability-described and swappable: analytic/0D electromechanical; 2D/3D pressure acoustics; structural FEM; magnetic FEMM, etc.
+- Avoid requiring a particular paid solver for initial M0 contract tests.
+- A CLI is the first control plane, with optional MCP and local GUI later; no bundled LLM.
 
-## Data provenance
-Persist project revision, topology template version, input geometry and material identifiers, material B-H curves, excitation/conditions, mesh controls, solver version, run status, outputs, validation checks, and timestamps. Hash or content-address input snapshots to permit exact comparisons.
+## Crucial acoustic requirements
+- Every SPL value has reference pressure 20 µPa in air, RMS convention and field/drive/measurement conditions; absolute pressure at unspecified reference is rejected.
+- Record excitation (input voltage RMS, supplied current or power), electrical loading, temperature/medium, distance, direction, and baffle/fixture geometry.
+- Distinguish full electroacoustic forward response from imposed-velocity acoustic radiation: prescribing velocity ignores source feedback unless coupling explicitly exists.
+- Linear piston models have restricted frequency and displacement validity and cannot accurately promise high-frequency breakup or harmonic distortion.
+- Keep simulation target tolerances and acceptance criteria as separate signed records.
 
-## Safety / reliability boundaries
-- No arbitrary source execution from untrusted prompts.
-- Validate units, ranges, intersecting components, missing material properties, and unsupported topologies before solver execution.
-- Separate an agent's proposed action from the engine's verified and executed action.
-- Expose human confirmation gates for destructive operations, costly jobs and design release.
-- Explicitly distinguish simulated, measured, inferred and estimated results.
+## Provenance / controls
+Store all input data, source/revision, topology, solver settings/version, mesh checks, model limits, result status and comparison metrics. No fabricated results. Protect expensive or destructive runs behind engineer approval.
 
-## Future extensibility
-Create new transducer templates and physics adapters without rewriting common project formats. 3D acoustic and structural analysis use the same orchestration records but different required inputs and validation rules.
+## First installed solver priority
+A validated small-signal electroacoustic reference model / supported acoustics workflow; FEMM reserved for motor fitting later. Engineers' existing tools take precedence.
