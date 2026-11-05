@@ -1,26 +1,31 @@
 # SpeakerAgent — Project Overview
 
 ## Mission
-Build an engineer-ready, model-agnostic tool layer for loudspeaker driver development. Engineers should be able to use existing CAD/CAE/measurement applications through Codex, Claude, or another external agent, without learning to program.
+Build an engineer-ready, model-neutral tool layer for loudspeaker driver development. It helps engineers achieve specified ACOUSTIC targets first, then derive electromechanical targets and fit physical driver designs using existing CAE/CAD/measurement tools. Codex, Claude, or another external agent may control these tools; the package contains no AI model.
 
 ## Product boundaries
-- SpeakerAgent does NOT bundle, host, or require a language model.
-- SpeakerAgent is NOT a replacement for COMSOL, ANSYS, MATLAB, KLIPPEL, LOUDSOFT, or CAD.
-- SpeakerAgent is NOT a new finite-element or acoustic solver.
-- It provides validated engineering tools, normalized data contracts, solver adapters, repeatable workflows, and traceable results.
-- Existing commercial engineering workflows take priority; avoid forced migration.
-- Human engineers approve requirements, geometry changes, expensive runs, and release decisions.
+- Not a new multiphysics solver and not a replacement for COMSOL, ANSYS, MATLAB, KLIPPEL, LOUDSOFT or an engineer's CAD.
+- No hosted, bundled or compulsory LLM; external AI integration remains optional.
+- Reuse commercial engineering tools and measured data whenever available; deliver a well-defined CLI and later MCP tool layer.
+- Separate the target, idealized acoustic predictions, electromechanical feasible-region search, physical geometry fitting, high-fidelity verification and measured validation.
+- Engineers approve assumptions, constraints, expensive runs and manufacturing release.
 
-## First product family
-General loudspeaker-driver design is the long-term goal: cone drivers, tweeters, miniature drivers, and later specialized transducers. Physics and geometry modules are topology-specific; the orchestration core stays common.
+## Guiding workflow — acoustic first
+1. Declare measurable acoustic requirements and test conditions.
+2. Build a lightweight acoustic/electromechanical approximation to assess feasibility.
+3. Inverse-fit feasible families of mass/compliance/loss/force-factor/impedance parameters. Do not claim a unique inverse solution.
+4. Fit diaphragm, surround, spider, coil and magnetic geometry to those feasible families.
+5. Re-run acoustics using high-fidelity or measured-derived parameters, evaluate and iterate.
+6. Record deviations, uncertainties, fabrication constraints and provenance.
 
-## First milestone
-M0: canonical data contracts, units, versioned project records, tool interface, diagnostic records, tests.
-M1: a verified 2D axisymmetric moving-coil motor workflow using FEMM, including field maps, BL(x), constraints, optimization, and reports.
-A COMSOL adapter is a later expansion, not a prerequisite to the first working demonstration.
+## Scope and prioritization
+General loudspeaker drivers (cone drivers, tweeters, microspeakers, later specialized types). Common orchestration, topology-specific physics models.
 
-## Definition of usable
-An acoustic engineer selects an approved template, enters dimensions and engineering constraints, launches a tool-driven simulation, sees convergence and objective metrics, compares versions, and can export a reproducible result. A connected external agent can perform the same workflow through a stable tool interface.
+M0: acoustic target and measurement-condition data contracts, units, versioning, reference cases, solver capability contracts and verification standards.
+M1: end-to-end acoustic-first *small-signal* reference workflow, using an equivalent electromechanical model coupled to an appropriate acoustic radiation model; compare to independent analytical and/or official solver references.
+M2: diaphragm, suspension and acoustic-structure refinement with external FEM/BEM where available.
+M3: motor fitting (FEMM/COMSOL/other approved tools) to demanded BL/Le/current/thermal constraints; close the acoustic loop.
+M4+: nonlinear, thermal and specialized driver topologies.
 
-## Explicitly out of scope for M0/M1
-Full 3D acoustic radiation, diaphragm breakup, suspension nonlinearity, THD prediction, mass-production drawings, manufacturing sign-off, and model-generated unvalidated simulation code.
+## Current status
+Specifications and minimal Python contracts only. No acoustic or magnetic finite-element solver has been executed or physically validated through this repository. No production drawing or measurement data has been supplied.
