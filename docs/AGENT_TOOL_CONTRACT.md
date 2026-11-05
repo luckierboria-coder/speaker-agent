@@ -1,32 +1,30 @@
-# External-Agent Tool Contract (draft)
+# External-Agent Tool Contract — Acoustic First (draft)
 
-The project is agent-ready, but AI-provider-neutral. Calls to engineering tools are explicit JSON-compatible operations, not generated unrestricted code.
+SpeakerAgent is a deterministic tool layer callable from Codex, Claude, other external agents or an engineer GUI. No bundled AI.
 
-## Proposed tools
-- project.create / project.load / project.snapshot
-- topology.list / topology.describe
-- material.list / material.inspect
-- design.validate
-- geometry.preview
-- solver.list / solver.capabilities / solver.health
-- simulation.prepare / simulation.run / simulation.status / simulation.results
-- design.evaluate / design.compare
-- optimization.propose / optimization.run / optimization.status
+## Proposed namespaced tools (not implemented yet unless stated)
+- acoustic_target.validate, acoustic_target.describe
+- measurement.import, measurement.validate
+- solver.list, solver.capabilities, solver.health
+- acoustic.forward_model, acoustic.compare_reference
+- acoustic.infer_feasible_parameters, acoustic.rank_candidates
+- driver.mechanical_fit, motor.fit_to_required_parameters
+- simulation.prepare, simulation.run, simulation.status, simulation.results
+- design.close_loop, design.compare
 - report.export
 
-Names and payloads remain provisional until M0.1 schemas and automated tests are adopted.
-
-## Standard request concepts
-project_id, revision_id, topology_id, model_version, variable map with unit-typed values, solver preference, allowed run budget, approval token for protected actions.
-
-## Standard response concepts
-run_id, status (queued/running/succeeded/failed/cancelled), engine/version, input snapshot hash, artifact references, diagnostics, result units, verification status, limitations.
+## Contracts
+Inputs always include project/revision, topology, frequency sampling, SPL reference definition, drive/measurement conditions, baffle and acoustic load, constraints and solver preferences. Responses include units, algorithm/model version, input hash, observables, verification status, numerical diagnostics, declared assumptions, feasibility, convergence and provenance.
 
 ## Error taxonomy
-INVALID_INPUT, MISSING_MATERIAL, UNSUPPORTED_PHYSICS, SOLVER_NOT_INSTALLED, LICENSE_UNAVAILABLE, MESH_FAILURE, NONCONVERGED, TIMEOUT, CANCELLED, ARTIFACT_CORRUPT.
+MISSING_MEASUREMENT_CONDITION, INVALID_REFERENCE, OUT_OF_MODEL_RANGE, UNIDENTIFIABLE_INVERSE_PROBLEM, NO_FEASIBLE_SOLUTION, MISSING_MATERIAL, SOLVER_NOT_INSTALLED, LICENSE_UNAVAILABLE, MESH_FAILURE, NONCONVERGED, TIMEOUT, CANCELLED, INVALID_INPUT.
 
-## Human-in-the-loop controls
-External agents can create proposals and request verified engineering actions. A user must approve high-cost batches, deletion or replacement of artifacts, and release of designs into manufacturing. Solver output must not be silently fabricated, backfilled or converted into a measured claim.
+## Guardrails
+- Never invent measured or computed frequency response or reference material data.
+- Never equate 2.83 V with 1 W except at 8 ohm nominal resistive load under explicitly suitable conditions.
+- If model conditions differ from target conditions, return an incompatibility diagnostic instead of a score.
+- An external LLM may plan calls; actual physics is computed only by explicitly installed and validated tools.
+- Human approval for destructive edits, costly runs and manufacturing release.
 
-## Future transports
-Prefer a deterministic Python/CLI core; add MCP tools for Codex/Claude and a desktop GUI without duplicating physics logic.
+## Stage priority
+Acoustic target, model and validation first. Motor-fitting tools are introduced only after electromechanical targets are derived and validated.
