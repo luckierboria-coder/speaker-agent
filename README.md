@@ -1,52 +1,53 @@
 # SpeakerAgent
 
-**Agent-ready, model-agnostic engineering tools for loudspeaker driver design.**
+**Agent-ready engineering tools for acoustic-target-driven loudspeaker driver design.**
 
-SpeakerAgent is an engineering tool layer for practical loudspeaker-driver development. It is designed for acoustic engineers who want to use their existing CAD, CAE, simulation, and measurement software with external agents such as Codex or Claude.
+SpeakerAgent is a deterministic, AI-provider-neutral engineering tool layer. It connects acoustics, electromechanical modeling, structural geometry and motor fitting through existing CAD/CAE/measurement software used by acoustic engineers. It does **not** bundle a language model, implement a new FEM solver, or demand a migration from an established COMSOL/ANSYS/MATLAB/KLIPPEL workflow. External Codex/Claude or other agents may use its validated tools.
 
-> **Important:** SpeakerAgent does not embed or bundle a language model and does not attempt to replace existing commercial solvers.
+## Design principle: acoustic goal first
 
-## Goals
+Acoustic performance target (FR/SPL/directivity and test conditions)
+→ physics/feasibility checks
+→ small-signal electroacoustic forward model and parameter fitting
+→ diaphragm/suspension geometry fitting
+→ motor fitting to required BL/Le/Re and stroke
+→ acoustic re-simulation, verification, design revision.
 
-- Standardize loudspeaker design parameters, units, constraints, material provenance, simulation tasks and results.
-- Expose validated engineering operations through a Python core, then CLI/MCP adapters for external agents.
-- Prioritize interoperability with the software already used by engineers (FEMM first, COMSOL and other tool adapters later).
-- Run reproducible physical simulations and optimization tasks with explicit convergence/verification checks.
-- Support conventional cone drivers first while retaining an extensible framework for miniature, tweeter and other transducer architectures.
-- Keep engineers in control of input assumptions, expensive jobs and release decisions.
+A target is not a result. A fitted equivalent model is not proof of an actual manufacturable driver. A single response curve does not uniquely determine motor geometry.
 
-## Current stage: M0 foundation (not yet a working solver)
+## Current status: M0 engineering preparation
 
-The repository contains initial engineering specifications, a Python project skeleton, minimal solver-neutral data contracts, unit tests, and CI configuration.
+**Implemented in repository:** planning specs; basic typed engineering contracts; acoustic target conditions and sampled SPL target validation; synthetic-contract unit tests; benchmark registry; CI configuration.
 
-**Implemented:** core project structure, a basic SI scalar/input contract, smoke tests, and documentation.
+**Not implemented/verified:** physical acoustic predictions, COMSOL or other acoustic solver integration, completed physical acoustic benchmark, FEMM execution, driver-measured calibration, mechanical and motor design fitting, external-agent tool transport or GUI.
 
-**Not yet implemented:** FEMM solver adapter, motor parameterized geometry, BL(x) extraction, solver validation, optimization, GUI, MCP integration, or COMSOL connectivity.
+## Roadmap
 
-## Roadmap overview
-
-| Milestone | Goal |
+| Stage | Deliverable |
 | --- | --- |
-| M0 | Engineering data model, input validation, tool contract and diagnostics |
-| M1 | Verified 2D axisymmetric moving-coil magnetic motor workflow with FEMM and optimization |
-| M2 | Lumped electroacoustic models and measurement comparisons |
-| M3 | Diaphragm and suspension structural models |
-| M4 | 3D acoustic and multiphysics solver adapters |
-| M5+ | Nonlinear and thermal modeling, tolerances, BOM and production workflows |
+| M0 | Acoustic target/measurement specification, data model, validation requirements and adapter capability interfaces |
+| M1 | Small-signal acoustic forward prediction, benchmark validation and feasible electromechanical parameter search |
+| M2 | Diaphragm/suspension structural fitting and acoustic-structure cross-checks |
+| M3 | Motor design fitting for required BL/Le/thermal limits, with full acoustic loop re-evaluation |
+| M4+ | Nonlinear distortion, thermal behavior, production tolerance analysis and more driver types |
 
-See [the full roadmap](docs/ROADMAP.md).
+See [roadmap](docs/ROADMAP.md) and [project overview](docs/PROJECT_OVERVIEW.md).
 
 ## Documentation
 
-- [Project scope and boundaries](docs/PROJECT_OVERVIEW.md)
-- [Software architecture](docs/ARCHITECTURE.md)
-- [Engineering specification for M0/M1](docs/M0_M1_ENGINEERING_SPEC.md)
-- [Agent tool contract (draft)](docs/AGENT_TOOL_CONTRACT.md)
+- [Acoustic-target-first engineering spec](docs/M0_M1_ENGINEERING_SPEC.md)
+- [Acoustic target input requirements](docs/engineering/ACOUSTIC_TARGET_REQUIREMENTS.md)
+- [Benchmark validation plan](docs/engineering/ACOUSTIC_BENCHMARK_PLAN.md)
+- [Material data policy](docs/engineering/MATERIAL_DATA_POLICY.md)
+- [CAD and geometry interface](docs/engineering/CAD_AND_GEOMETRY_INTERFACE.md)
+- [Solver capabilities](docs/engineering/SOLVER_CAPABILITIES.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [Agent tool contract](docs/AGENT_TOOL_CONTRACT.md)
 - [Development setup](docs/DEVELOPMENT.md)
 
-## Quick start (M0 only)
+## Install M0 contract tests (Windows PowerShell)
 
-Requires Python 3.12+.
+Requires Python 3.12+:
 
 ```powershell
 git clone https://github.com/luckierboria-coder/speaker-agent.git
@@ -57,16 +58,10 @@ python -m pip install -e ".[dev]"
 python -m pytest -q
 ```
 
-The command above exercises data-contract tests only; it does **not** run a loudspeaker simulation. FEMM/COMSOL remain separate installations subject to their licenses.
+These are only metadata and contract tests; they do not run a physics solver or verify a speaker prediction.
 
-## Engineering principles
+## Evidence status and licensing
 
-1. Prefer existing engineer software and workflows over a replacement platform.
-2. Keep language models external, optional and swappable.
-3. Separate agent recommendations from verified numerical computation.
-4. Report units, solver versions, input provenance, mesh checks and limitations.
-5. Do not claim physical validity until validated against trusted references or measurements.
+The official COMSOL [Lumped Loudspeaker Driver reference model](https://www.comsol.com/model/lumped-loudspeaker-driver-12295) is an intended independent benchmark, not a result that has already been reproduced. No production sample, measured curve or certified materials have yet been received.
 
-## Licensing
-
-No open-source license has been selected yet. Until one is added, standard copyright rules apply. Do not assume this public repository grants broad reuse rights.
+No license has been selected for this repository. The repository may be public, but its contents are not automatically open-source licensed. Do not commit confidential customer drawings, measurements, or material curves.
